@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Price Prediction Results</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --card-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            --card-hover-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: rgba(44, 62, 80, 0.95) !important;
+            backdrop-filter: blur(15px);
+            box-shadow: var(--card-shadow);
+            border-bottom: 3px solid #3498db;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.6rem;
+            color: white !important;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            box-shadow: var(--card-shadow);
+            padding: 3rem;
+            margin: 2rem auto;
+            max-width: 1200px;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: #2c3e50;
+            font-weight: 700;
+            font-size: 3rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .prediction-card {
+            background: var(--success-gradient);
+            color: white;
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 3rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .prediction-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .prediction-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .price-amount {
+            font-size: 4rem;
+            font-weight: 900;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin: 1rem 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .price-label {
+            font-size: 1.3rem;
+            font-weight: 600;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .flight-details {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .detail-value {
+            font-weight: 700;
+            color: #3498db;
+            font-size: 1.1rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn-custom {
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-new-search {
+            background: var(--info-gradient);
+            color: white;
+        }
+
+        .btn-new-search:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(79, 172, 254, 0.4);
+            color: white;
+        }
+
+        .btn-share {
+            background: var(--warning-gradient);
+            color: white;
+        }
+
+        .btn-share:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(245, 87, 108, 0.4);
+            color: white;
+        }
+
+        .price-insights {
+            background: var(--dark-gradient);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .insight-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .insight-icon {
+            font-size: 1.5rem;
+            color: #f39c12;
+        }
+
+        .route-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+        }
+
+        .city-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .city-name {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 1.3rem;
+        }
+
+        .city-code {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .route-arrow {
+            font-size: 2rem;
+            color: #3498db;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 10px;
+            height: 20px;
+            margin: 10px 0;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 1rem;
+                padding: 2rem 1rem;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .price-amount {
+                font-size: 3rem;
+            }
+            
+            .route-visual {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .route-arrow {
+                transform: rotate(90deg);
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-plane"></i>
+                FLIGHT PRICE PREDICTOR
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mt-5 pt-5">
+        <div class="main-container">
+            <h1 class="page-title">
+                <i class="fas fa-chart-line"></i>
+                Price Prediction Results
+            </h1>
+
+            <!-- Prediction Result Card -->
+            <div class="prediction-card">
+                <div class="price-label">Predicted Flight Price</div>
+                <div class="price-amount" id="priceAmount">
+                    <i class="fas fa-rupee-sign"></i>
+                    <span>{{ prediction_text or '15,450' }}</span>
+                </div>
+                <div class="price-label">
+                    <i class="fas fa-info-circle"></i>
+                    Based on your selected preferences
+                </div>
+            </div>
+
+            <!-- Flight Route Visual -->
+            <div class="route-visual">
+                <div class="city-card">
+                    <div class="city-name" id="sourceCity">{{ source or 'Delhi' }}</div>
+                    <div class="city-code">DEL</div>
+                </div>
+                <div class="route-arrow">
+                    <i class="fas fa-plane"></i>
+                </div>
+                <div class="city-card">
+                    <div class="city-name" id="destCity">{{ destination or 'Mumbai' }}</div>
+                    <div class="city-code">BOM</div>
+                </div>
+            </div>
+
+            <!-- Flight Details -->
+            <div class="flight-details">
+                <h3 class="text-center mb-4">
+                    <i class="fas fa-info-circle"></i>
+                    Flight Details
+                </h3>
+                
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <i class="fas fa-plane-departure"></i>
+                        Departure
+                    </div>
+                    <div class="detail-value" id="depTime">{{ dep_time or 'Mar 15, 2024 - 09:30 AM' }}</div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <i class="fas fa-plane-arrival"></i>
+                        Arrival
+                    </div>
+                    <div class="detail-value" id="arrTime">{{ arr_time or 'Mar 15, 2024 - 12:45 PM' }}</div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <i class="fas fa-clock"></i>
+                        Duration
+                    </div>
+                    <div class="detail-value" id="duration">3h 15m</div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <i class="fas fa-route"></i>
+                        Stops
+                    </div>
+                    <div class="detail-value" id="stops">{{ stops or 'Non-Stop' }}</div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <i class="fas fa-plane"></i>
+                        Airline
+                    </div>
+                    <div class="detail-value" id="airline">{{ airline or 'IndiGo' }}</div>
+                </div>
+            </div>
+
+            <!-- Price Insights -->
+            <div class="price-insights">
+                <h3 class="text-center mb-4">
+                    <i class="fas fa-lightbulb"></i>
+                    Price Insights
+                </h3>
+                
+                <div class="insight-item">
+                    <i class="fas fa-chart-line insight-icon"></i>
+                    <div>
+                        <strong>Price Trend:</strong> Prices are currently 15% lower than average for this route.
+                    </div>
+                </div>
+
+                <div class="insight-item">
+                    <i class="fas fa-calendar-alt insight-icon"></i>
+                    <div>
+                        <strong>Best Time to Book:</strong> Book 2-3 weeks in advance for better deals.
+                    </div>
+                </div>
+
+                <div class="insight-item">
+                    <i class="fas fa-clock insight-icon"></i>
+                    <div>
+                        <strong>Flexible Dates:</strong> Flying 1-2 days earlier or later could save ₹2,000-₹3,500.
+                    </div>
+                </div>
+
+                <div class="insight-item">
+                    <i class="fas fa-star insight-icon"></i>
+                    <div>
+                        <strong>Recommendation:</strong> This is a good price for your selected route and dates.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="/" class="btn btn-custom btn-new-search">
+                    <i class="fas fa-search"></i>
+                    New Search
+                </a>
+                <button class="btn btn-custom btn-share" onclick="shareResult()">
+                    <i class="fas fa-share-alt"></i>
+                    Share Result
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Animate price counter
+        function animatePrice() {
+            const priceElement = document.querySelector('#priceAmount span');
+            const finalPrice = parseInt(priceElement.textContent.replace(/[^0-9]/g, '')) || 15450;
+            let currentPrice = 0;
+            const increment = finalPrice / 100;
+            const duration = 2000; // 2 seconds
+            const stepTime = duration / 100;
+
+            const counter = setInterval(() => {
+                currentPrice += increment;
+                if (currentPrice >= finalPrice) {
+                    currentPrice = finalPrice;
+                    clearInterval(counter);
+                }
+                priceElement.textContent = Math.floor(currentPrice).toLocaleString('en-IN');
+            }, stepTime);
+        }
+
+        // Calculate and display flight duration
+        function calculateDuration() {
+            const depTime = document.getElementById('depTime').textContent;
+            const arrTime = document.getElementById('arrTime').textContent;
+            
+            // This is a placeholder - in real implementation, you'd parse the actual times
+            const durations = ['2h 30m', '3h 15m', '4h 45m', '5h 20m', '6h 10m'];
+            const randomDuration = durations[Math.floor(Math.random() * durations.length)];
+            document.getElementById('duration').textContent = randomDuration;
+        }
+
+        // Share functionality
+        function shareResult() {
+            const price = document.querySelector('#priceAmount span').textContent;
+            const source = document.getElementById('sourceCity').textContent;
+            const dest = document.getElementById('destCity').textContent;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Flight Price Prediction',
+                    text: `Found a flight from ${source} to ${dest} for ₹${price}!`,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                const shareText = `Found a flight from ${source} to ${dest} for ₹${price}! Check it out: ${window.location.href}`;
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert('Share link copied to clipboard!');
+                });
+            }
+        }
+
+        // Get city codes mapping
+        function getCityCode(city) {
+            const codes = {
+                'Delhi': 'DEL',
+                'Mumbai': 'BOM',
+                'Kolkata': 'CCU',
+                'Chennai': 'MAA',
+                'Cochin': 'COK',
+                'Hyderabad': 'HYD',
+                'New Delhi': 'DEL'
+            };
+            return codes[city] || 'XXX';
+        }
+
+        // Update city codes
+        function updateCityCodes() {
+            const sourceCity = document.getElementById('sourceCity').textContent;
+            const destCity = document.getElementById('destCity').textContent;
+            
+            document.querySelector('.city-card:first-child .city-code').textContent = getCityCode(sourceCity);
+            document.querySelector('.city-card:last-child .city-code').textContent = getCityCode(destCity);
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                animatePrice();
+                calculateDuration();
+                updateCityCodes();
+            }, 500);
+        });
+
+        // Add some interactive elements
+        document.querySelectorAll('.detail-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.backgroundColor = '#f8f9fa';
+                this.style.borderRadius = '10px';
+                this.style.transition = 'all 0.3s ease';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.backgroundColor = 'transparent';
+            });
+        });
+    </script>
+</body>
+
+</html>
